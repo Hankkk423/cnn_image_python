@@ -43,12 +43,12 @@ test_data = test_data.batch(batch_size)
 
 ### Build CNN Model ###
 model = models.Sequential([
-    layers.Conv2D(16, (3, 3), activation='relu', input_shape=(64, 64, 3)),
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 3)),
     layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(32, (3, 3), activation='relu'),
+    layers.Conv2D(64, (3, 3), activation='relu'),
     layers.MaxPooling2D((2, 2)),
     layers.Flatten(),
-    layers.Dense(64, activation='relu'),
+    layers.Dense(128, activation='relu'),
     layers.Dense(10, activation='softmax')
 ])
 
