@@ -1,4 +1,5 @@
 saved-model/*
+training_history.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

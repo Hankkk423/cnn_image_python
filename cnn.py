@@ -9,6 +9,23 @@ from tensorflow.keras.models import load_model
 dataset_name = 'cifar10'
 (train_data, test_data), info = tfds.load(dataset_name, split=['train', 'test'], with_info=True, as_supervised=True)
 
+# Iterate through the first 5 samples in the training data
+for i, (image, label) in enumerate(train_data.take(3)):
+    print(f"Sample {i+1}:")
+    print("Image shape:", image.shape)
+    print("Label:", label.numpy())
+    print("Pixel values:")
+    print(image.numpy())
+    print("=" * 30)
+
+# Get the size of the training data
+train_data_size = tf.data.experimental.cardinality(train_data).numpy()
+# Get the size of the test data
+test_data_size = tf.data.experimental.cardinality(test_data).numpy()
+
+print("Size of training data:", train_data_size)
+print("Size of test data:", test_data_size)
+
 
 ### Preprocess Images ###
 def preprocess_image(image, label):
@@ -36,14 +53,20 @@ model = models.Sequential([
 ])
 
 
-model.compile(optimizer='adam',
+### Train the Model ###
+num_epochs = 5
+decay_steps = (train_data_size/batch_size) * 4
+initial_learning_rate = 0.001
+
+lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+    initial_learning_rate, decay_steps=decay_steps, decay_rate=0.9
+)
+optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+
+model.compile(optimizer=optimizer,
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-              
-
-### Train the Model ###
-num_epochs = 5
 history = model.fit(train_data, epochs=num_epochs, validation_data=test_data)
 
 
@@ -57,6 +80,9 @@ plt.xlabel('Epoch')
 plt.ylabel('Accuracy')
 plt.ylim([0, 1])
 plt.legend(loc='lower right')
+# Save the plot as an image
+plt.savefig('training_history.png')  # Specify the filename and format (e.g., .png)
+# Display the plot
 plt.show()
 
 
@@ -83,11 +109,9 @@ predictions = model.predict(test_data)
 #     print("=" * 30)
 
 
-
 ### Save the model to a file ###
 model.save('saved-model/my_model.h5')
 print('Model Saved!')
-
 
 
 ### Load the saved model ###
@@ -95,7 +119,6 @@ loaded_model = load_model('saved-model/my_model.h5')
 
 # Evaluate the loaded model on test data
 loaded_test_loss, loaded_test_acc = loaded_model.evaluate(test_data)
-
 print(f"Loaded model test accuracy: {loaded_test_acc}")
 
 
